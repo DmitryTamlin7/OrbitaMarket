@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: io.micrometer:micrometer-jakarta9:1.12.5" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="io.micrometer" artifactId="micrometer-jakarta9" version="1.12.5" baseVersion="1.12.5" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/io.micrometer/micrometer-jakarta9/1.12.5/8fe03be9a51974cdb700b04c8df5378f8566c179/micrometer-jakarta9-1.12.5.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/io.micrometer/micrometer-jakarta9/1.12.5/1d2b8c6ce028757070d647f5873eead46fe57350/micrometer-jakarta9-1.12.5-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

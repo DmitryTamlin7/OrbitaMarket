@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: org.springframework.cloud:spring-cloud-commons:4.1.2" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="org.springframework.cloud" artifactId="spring-cloud-commons" version="4.1.2" baseVersion="4.1.2" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/org.springframework.cloud/spring-cloud-commons/4.1.2/84377482af72a3ef008b6c981e77897a04ae20aa/spring-cloud-commons-4.1.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/org.springframework.cloud/spring-cloud-commons/4.1.2/a8b374429bd59b904b524c1179ec95cfd75e5a95/spring-cloud-commons-4.1.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

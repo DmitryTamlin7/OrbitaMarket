@@ -1,0 +1,28 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: payments-service
+          uri: http://orbita_payments:8080
+          predicates:
+            - Path=/payments/**, /api/v1/payments/**
+
+        - id: orders-service
+          uri: http://orbita_orders:8080
+          predicates:
+            - Path=/orders/**, /api/v1/orders/**
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs

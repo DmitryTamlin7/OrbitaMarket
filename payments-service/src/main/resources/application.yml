@@ -1,0 +1,48 @@
+server:
+  port: 8081 # Выделим для сервиса платежей порт 8081 (чтобы не занимать дефолтный 8080)
+
+spring:
+  application:
+    name: payments-service
+
+  # Настройки подключения к PostgreSQL
+  datasource:
+    url: jdbc:postgresql://localhost:5432/orbitaMarketPay # Имя твоей БД
+    username: postgres                             # Твой логин к БД
+    password: ***REMOVED***                 # Твой пароль к БД
+    driver-class-name: org.postgresql.Driver
+
+  # Настройки JPA / Hibernate
+  jpa:
+    hibernate:
+      # update автоматически создаст таблицу accounts или обновит её структуру при запуске.
+      # Для продакшена обычно используют 'validate' + Liquibase/Flyway, но для локальной разработки это идеальный выбор.
+      ddl-auto: update
+    show-sql: true # Показывать SQL-запросы в консоли (очень полезно для дебага)
+    properties:
+      hibernate:
+        format_sql: true # Красивое форматирование SQL в логах
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  # Настройки брокера сообщений Kafka (задел для будущей асинхронной логики списаний)
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: payments-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "ru.dmitry.orbita.payments.*" # Разрешаем десериализацию DTO из нашего пакета
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+# Настройки Swagger (Springdoc OpenAPI)
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html # Ссылка будет выглядеть так: http://localhost:8081/swagger-ui/index.html
+    operations-sorter: alpha # Сортировка эндпоинтов по алфавиту
+    tags-sorter: alpha

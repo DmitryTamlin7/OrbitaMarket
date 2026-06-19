@@ -7,8 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import javax.security.auth.login.AccountNotFoundException;
 import java.time.Instant;
 
 @RestControllerAdvice
@@ -48,7 +46,4 @@ public class GlobalExceptionHandler {
         ErrorResponse errorDto = new ErrorResponse(errorCode, message, Instant.now());
         return ResponseEntity.status(status).body(errorDto);
     }
-
-
-
 }

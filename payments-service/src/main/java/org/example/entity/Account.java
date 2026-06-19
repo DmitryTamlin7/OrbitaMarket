@@ -24,7 +24,7 @@ public class Account {
     private UUID id;
 
     @Column(name = "user_id", nullable = false, unique = true)
-    private String user_id;
+    private String userId;
 
     @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
     private Long balance = 0L;
@@ -32,8 +32,8 @@ public class Account {
     @Version
     private Long version;
 
-    public Account(String user_id, Long balance) {
-        this.user_id = user_id;
+    public Account(String user_id) {
+        this.userId = user_id;
         this.balance = 0L;
     }
 

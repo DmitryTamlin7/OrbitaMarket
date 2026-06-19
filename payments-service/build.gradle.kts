@@ -1,6 +1,6 @@
 plugins {
     id("java")
-    id("org.springframework.boot") version "3.2.5"
+    id("org.springframework.boot") version "3.4.0"
 }
 
 group = "org.example"
@@ -8,6 +8,10 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+}
+
+tasks.bootJar {
+    mainClass.set("org.example.PaymentsApplication")
 }
 
 dependencies {
@@ -27,6 +31,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.32")
     testCompileOnly("org.projectlombok:lombok:1.18.32")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.32")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
 
 }
 

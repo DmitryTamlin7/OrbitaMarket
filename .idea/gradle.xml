@@ -11,6 +11,15 @@
         </option>
         <option name="myGradleHome" value="" />
       </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/payments-service" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/payments-service" />
+          </set>
+        </option>
+        <option name="myGradleHome" value="" />
+      </GradleProjectSettings>
     </option>
   </component>
 </project>

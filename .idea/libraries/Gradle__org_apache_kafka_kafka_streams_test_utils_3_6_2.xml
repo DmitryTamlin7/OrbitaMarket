@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: org.apache.kafka:kafka-streams-test-utils:3.6.2" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="org.apache.kafka" artifactId="kafka-streams-test-utils" version="3.6.2" baseVersion="3.6.2" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/org.apache.kafka/kafka-streams-test-utils/3.6.2/a2a37a89d62f73a519b1d89d48eb44b5e4ab6129/kafka-streams-test-utils-3.6.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/org.apache.kafka/kafka-streams-test-utils/3.6.2/e290d6f685fe683290ea18548ea39a007ac9f3d8/kafka-streams-test-utils-3.6.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

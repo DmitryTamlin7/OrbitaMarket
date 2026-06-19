@@ -5,6 +5,9 @@
       <module name="api-gateway" target="25" />
       <module name="api-gateway.main" target="25" />
       <module name="api-gateway.test" target="25" />
+      <module name="payments-service" target="25" />
+      <module name="payments-service.main" target="25" />
+      <module name="payments-service.test" target="25" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
@@ -12,6 +15,9 @@
       <module name="api-gateway" options="-parameters" />
       <module name="api-gateway.main" options="-parameters" />
       <module name="api-gateway.test" options="-parameters" />
+      <module name="payments-service" options="-parameters" />
+      <module name="payments-service.main" options="-parameters" />
+      <module name="payments-service.test" options="-parameters" />
     </option>
   </component>
 </project>

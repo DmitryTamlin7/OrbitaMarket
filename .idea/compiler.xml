@@ -1,13 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Gradle Imported" enabled="true">
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.32/17d46b3e205515e1e8efd3ee4d57ce8018914163/lombok-1.18.32.jar" />
+        </processorPath>
+        <module name="order-service.main" />
+        <module name="order-service.test" />
+      </profile>
+    </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="api-gateway" target="25" />
-      <module name="api-gateway.main" target="25" />
-      <module name="api-gateway.test" target="25" />
-      <module name="payments-service" target="25" />
-      <module name="payments-service.main" target="25" />
-      <module name="payments-service.test" target="25" />
+      <module name="api-gateway" target="22" />
+      <module name="api-gateway.main" target="22" />
+      <module name="api-gateway.test" target="22" />
+      <module name="oeder-service.main" target="22" />
+      <module name="oeder-service.test" target="22" />
+      <module name="order-service" target="22" />
+      <module name="order-service.main" target="22" />
+      <module name="order-service.test" target="22" />
+      <module name="payments-service" target="22" />
+      <module name="payments-service.main" target="22" />
+      <module name="payments-service.test" target="22" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
@@ -15,6 +30,11 @@
       <module name="api-gateway" options="-parameters" />
       <module name="api-gateway.main" options="-parameters" />
       <module name="api-gateway.test" options="-parameters" />
+      <module name="oeder-service.main" options="-parameters" />
+      <module name="oeder-service.test" options="-parameters" />
+      <module name="order-service" options="-parameters" />
+      <module name="order-service.main" options="-parameters" />
+      <module name="order-service.test" options="-parameters" />
       <module name="payments-service" options="-parameters" />
       <module name="payments-service.main" options="-parameters" />
       <module name="payments-service.test" options="-parameters" />

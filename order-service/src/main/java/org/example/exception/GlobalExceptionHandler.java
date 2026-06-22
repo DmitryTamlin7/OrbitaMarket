@@ -1,0 +1,53 @@
+package org.example.exception;
+
+
+import org.example.dto.ErrorResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MissingRequestHeaderException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.Instant;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(InvalidPayloadException.class)
+    public ResponseEntity<ErrorResponse> handlerInvalidPayload(InvalidPayloadException exception){
+        return buildResponse("INVALID_PAYLOAD", exception.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidPriceException.class)
+    public ResponseEntity<ErrorResponse> handlerInvalidPrice(InvalidPriceException exception) {
+        return buildResponse("INVALID_PRICE", exception.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UnknownProductTypeException.class)
+    public ResponseEntity<ErrorResponse> handlerUnknownProductType(UnknownProductTypeException exception) {
+        return buildResponse("UNKNOWN_PRODUCT_TYPE", exception.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlerOrderNotFound(OrderNotFoundException exception){
+        return buildResponse("ORDER_NOT_FOUND", exception.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<ErrorResponse> handlerMissingHeader(MissingRequestHeaderException exception){
+        if ("X-User-Id".equals(exception.getHeaderName())){
+            return buildResponse("MISSING_X_USER_ID", "Header X-User_id NOT FOUND", HttpStatus.BAD_REQUEST);
+        }
+        if ("user_id".equals(exception.getParameter().getParameterName())){
+            return buildResponse("MISSING_USER_ID", "Parameter User_id NOT FOUND", HttpStatus.BAD_REQUEST);
+        }
+        return buildResponse("INTERNAL_ERROR", "Unknown header error", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+
+    private ResponseEntity<ErrorResponse> buildResponse(String errorCode, String message, HttpStatus status){
+        ErrorResponse response = new ErrorResponse(errorCode, message, Instant.now());
+        return ResponseEntity.status(status).body(response);
+    }
+
+}

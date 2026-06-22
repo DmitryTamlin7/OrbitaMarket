@@ -30,7 +30,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MissingRequestHeaderException.class)
     public ResponseEntity<ErrorResponse> handlerMissingHeader(MissingRequestHeaderException exception){
         if ("X-User-Id".equals(exception.getHeaderName())){
-            return buildResponse("MISSION_USER_ID", "Header X-User_id NOt FOUND", HttpStatus.BAD_REQUEST);
+            return buildResponse("MISSING_X_USER_ID", "Header X-User_id NOT FOUND", HttpStatus.BAD_REQUEST);
+        }
+        if ("user_id".equals(exception.getParameter().getParameterName())){
+            return buildResponse("MISSING_USER_ID", "Parameter User_id NOT FOUND", HttpStatus.BAD_REQUEST);
         }
         return buildResponse("INTERNAL_ERROR", "Unknown header error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -38,7 +41,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
     public ResponseEntity<ErrorResponse> handlerLockingFailure(ObjectOptimisticLockingFailureException exception){
-        return buildResponse("CONCURRENT_MODIFICATION", "Pleace retry the operation", HttpStatus.CONFLICT);
+        return buildResponse("CONCURRENT_MODIFICATION", "Please retry the operation", HttpStatus.CONFLICT);
     }
 
 

@@ -6,6 +6,9 @@
       <module fileurl="file://$PROJECT_DIR$/api-gateway.iml" filepath="$PROJECT_DIR$/api-gateway.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/api-gateway.main.iml" filepath="$PROJECT_DIR$/.idea/modules/api-gateway.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/api-gateway.test.iml" filepath="$PROJECT_DIR$/.idea/modules/api-gateway.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/order-service.iml" filepath="$PROJECT_DIR$/order-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/order-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/order-service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/order-service.test.iml" filepath="$PROJECT_DIR$/.idea/modules/order-service.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/payments-service.iml" filepath="$PROJECT_DIR$/payments-service.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/payments-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/payments-service.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/payments-service.test.iml" filepath="$PROJECT_DIR$/.idea/modules/payments-service.test.iml" />

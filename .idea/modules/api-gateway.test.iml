@@ -7,7 +7,7 @@
       <sourceFolder url="file://$MODULE_DIR$/../../api-gateway/src/test/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../api-gateway/src/test/resources" type="java-test-resource" />
     </content>
-    <orderEntry type="jdk" jdkName="25" jdkType="JavaSDK" />
+    <orderEntry type="jdk" jdkName="temurin-22" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="api-gateway.main" />
     <orderEntry type="library" name="Gradle: org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0" level="project" />

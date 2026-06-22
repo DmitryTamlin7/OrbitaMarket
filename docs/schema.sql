@@ -13,5 +13,5 @@ CREATE TABLE orders (
                         id UUID PRIMARY KEY,
                         user_id VARCHAR(255) NOT NULL,
                         price BIGINT NOT NULL,
-                        status VARCHAR(50) NOT NULL -- PENDING, PAID, FAILED
+                        status VARCHAR(50) NOT NULL
 );

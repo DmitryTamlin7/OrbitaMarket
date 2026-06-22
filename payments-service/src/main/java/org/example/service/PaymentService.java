@@ -21,21 +21,21 @@ public class PaymentService {
     public AccountBalanceDto createAccount(String userId){
         Optional<Account> existAccount = accountRepository.findByUserId(userId);
         if (existAccount.isPresent()){
-            log.warn("Аккаунт есть выдаем его");
+            log.info("Аккаунт есть выдаем его");
             Account account = existAccount.get();
             return new AccountBalanceDto(account.getUserId(), account.getBalance(), "geocredits" );
         }
         log.warn("Аккаунта нет, Создаем...");
         Account newAccount = new Account(userId);
         Account savedAccount = accountRepository.save(newAccount);
-        log.warn("Аккаунта Сохранен");
+        log.info("Аккаунта Сохранен");
         return new AccountBalanceDto(userId, savedAccount.getBalance(), "geocredits");
     }
 
     public AccountBalanceDto getBalance(String userId) {
         Account existAccount = accountRepository.findByUserId(userId)
                 .orElseThrow( () -> new AccountNotFoundException("Аккаунт не найден для: " + userId ));
-        log.warn("Аккаунт найден");
+        log.info("Аккаунт найден");
         return new AccountBalanceDto(existAccount.getUserId(), existAccount.getBalance(), "geocredits");
 
     }
@@ -47,11 +47,11 @@ public class PaymentService {
         }
         Account existAccount = accountRepository.findByUserId(userId)
                 .orElseThrow( () -> new AccountNotFoundException("Аккаунт не найден для: " + userId ));
-        log.warn("Аккаунт найден");
+        log.info("Аккаунт найден");
 
         existAccount.setBalance(existAccount.getBalance() + amount);
         Account newBalance = accountRepository.save(existAccount);
-        log.warn("Баланс увеличен и сохранен");
+        log.info("Баланс увеличен и сохранен");
         return new AccountBalanceDto(newBalance.getUserId(), newBalance.getBalance(), "geocredits");
     }
 

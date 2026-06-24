@@ -1,8 +1,5 @@
 package org.example.dto;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
-
 import java.time.Instant;
 import java.util.UUID;
 

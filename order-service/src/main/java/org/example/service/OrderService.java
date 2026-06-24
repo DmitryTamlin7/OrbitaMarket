@@ -3,10 +3,10 @@ package org.example.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
-import org.example.dto.CreateOrderRequest;
-import org.example.dto.OrderPaymentRequestedEvent;
-import org.example.dto.OrderResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.example.dto.*;
 import org.example.entity.Order;
 import org.example.entity.OrderStatus;
 import org.example.entity.OutboxEvent;
@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class OrderService {
@@ -68,5 +69,41 @@ public class OrderService {
                 savedOrder.getPrice(),
                 savedOrder.getCreatedAt()
         );
+    }
+
+    @Transactional
+    public void processPaymentCompletion(OrderPaymentCompletedEvent event){
+        Order order = orderRepository.findById(event.orderId())
+                .orElseThrow(() -> new EntityNotFoundException("Заказ не найден id:" + event.orderId()));
+
+        if (order.getOrderStatus().equals(OrderStatus.PAID)){
+            log.info("Заказ уже оплачен");
+            return;
+        }
+
+        if (!order.getOrderStatus().equals(OrderStatus.PAYMENT_PENDING)){
+            log.info("Заказ из статуса {} невозможно оплатить", OrderStatus.PAYMENT_PENDING);
+            return;
+        }
+
+        order.setOrderStatus(OrderStatus.PAID);
+        orderRepository.save(order);
+        log.info("Статус заказа PAID. Заказ {} созранен", order.getId());
+    }
+
+    @Transactional
+    public void processPaymentFailure(OrderPaymentFailedEvent event){
+        Order order = orderRepository.findById(event.orderId())
+                .orElseThrow(() -> new EntityNotFoundException("Заказ не найден id:" + event.orderId()));
+
+        if (order.getOrderStatus().equals(OrderStatus.PAYMENT_FAILED)){
+            log.info("Заказ уже в статусе PAYMENT_FAILED");
+            return;
+        }
+
+        order.setOrderStatus(OrderStatus.PAYMENT_FAILED);
+        order.setFailureReason(event.reason());
+        orderRepository.save(order);
+        log.info("Статус заказа: {} Причина: {} ", order.getOrderStatus(), order.getFailureReason());
     }
 }

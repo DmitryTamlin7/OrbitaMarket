@@ -2,14 +2,19 @@ package org.example.entity;
 
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.UUID;
 
+
 @Entity
 @Table(name = "outbox_events")
+@Setter
+@Getter
 public class OutboxEvent {
 
     @Id
@@ -31,4 +36,5 @@ public class OutboxEvent {
 
     @Column(nullable = false)
     private boolean processed = false;
+
 }

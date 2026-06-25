@@ -1,9 +1,12 @@
 package org.example.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.dto.AccountBalanceDto;
+import org.example.component.KafkaBrokerClient;
+import org.example.dto.*;
 import org.example.entity.Account;
 import org.example.exception.AccountNotFoundException;
 import org.example.exception.InvalidAmountException;
@@ -11,12 +14,18 @@ import org.example.repository.AccountRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
     private final AccountRepository accountRepository;
+    private final ObjectMapper objectMapper;
+    private final KafkaBrokerClient kafkaBrokerClient;
+
+    private final String TOPIC_COMPLETE = "payment-completed-events";
+    private final String TOPIC_FAILED = "payment-failed-events";
 
     public AccountBalanceDto createAccount(String userId){
         Optional<Account> existAccount = accountRepository.findByUserId(userId);
@@ -55,10 +64,35 @@ public class PaymentService {
         return new AccountBalanceDto(newBalance.getUserId(), newBalance.getBalance(), "geocredits");
     }
 
-    //TODO: Реализовать метод Payment связывает ордер через кафку и списывает кредитыо
+    @Transactional
+    public void processPayment(OrderPaymentRequestedEvent event){
+        log.info("Обработка платежа из заказа: {}, пользователя: {}", event.orderId(), event.userId());
 
+        Account account = accountRepository.findByUserId(event.userId())
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
 
-
-
-
+        if (account.getBalance() >= event.amount()) {
+            account.setBalance(account.getBalance() - event.amount());
+            accountRepository.save(account);
+            OrderPaymentCompletedEvent successEvent = new OrderPaymentCompletedEvent(
+                    UUID.randomUUID(),
+                    event.orderId(),
+                    event.userId(),
+                    event.amount(),
+                    account.getBalance().intValue()
+            );
+            kafkaBrokerClient.send(TOPIC_COMPLETE, successEvent);
+            log.info("Платеж одобрен и выполнен! Списано {}, Баланс: {}", event.amount(), account.getBalance());
+        }
+        else {
+            OrderPaymentFailedEvent failedEvent = new OrderPaymentFailedEvent(
+                    UUID.randomUUID(),
+                    event.orderId(),
+                    event.userId(),
+                    FailureReason.INSUFFICIENT_BALANCE
+            );
+            kafkaBrokerClient.send(TOPIC_FAILED, failedEvent);
+            log.error("Платеж отклонен. Недостаточно средств. Баланс: {}  Стоимость: {}", account.getBalance(), event.amount());
+        }
+    }
 }

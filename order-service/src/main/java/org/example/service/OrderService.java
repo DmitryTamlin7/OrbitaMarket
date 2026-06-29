@@ -37,6 +37,7 @@ public class OrderService {
 
         Order order = new Order();
         order.setUserId(userId);
+        order.setOrderStatus(OrderStatus.CREATED);
         order.setProductType(request.productType());
         order.setPrice(request.price());
         order.setPayload(request.payload());

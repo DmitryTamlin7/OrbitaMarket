@@ -6,8 +6,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.EXISTING_PROPERTY,
-        property = "productType",
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "product_type",
         visible = true
 )
 @JsonSubTypes({

@@ -11,24 +11,37 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
       - ./infrastructure/db-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d orbita_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   kafka:
-    image: bitnami/kafka:3.4
+    image: apache/kafka:3.8.0
     container_name: orbita_kafka
-    environment:
-      KAFKA_ENABLE_KRAFT: 'yes'
-      KAFKA_CFG_PROCESS_ROLES: broker,controller
-      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-      KAFKA_CFG_NODE_ID: 1
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
-      ALLOW_PLAINTEXT_LISTENER: 'yes'
     ports:
-      - "9092:9092"
+      - "9092:9092" # Для приложений внутри Docker (если решишь их туда вернуть)
+      - "9094:9094" # Для твоих локальных сервисов на Mac (через localhost:9094)
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@127.0.0.1:9093'
+
+      # Слушатели: PLAINTEXT (внутри докера), EXTERNAL (наружу на Mac), CONTROLLER (внутренний для KRaft)
+      KAFKA_LISTENERS: 'PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,EXTERNAL://0.0.0.0:9094'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT'
+
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
     volumes:
-      - kafka_data:/bitnami/kafka
+      - kafka_data:/var/lib/kafka/data
+    healthcheck:
+      test: [ "CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   api-gateway:
     build: .api/gateway
@@ -36,28 +49,34 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - orders-service
-      - payment-service
+      order-service:
+        condition: service_started
+      payments-service:
+        condition: service_started
 
-  orders-service:
-    build: ./orders-service
+  order-service:
+    build: ./order-service
     container_name: orbita_orders
     environment:
-        SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/orders_db
-        SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/orders_db
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     depends_on:
-      - postgres
-      - kafka
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
 
   payments-service:
     build: ./payments-service
     container_name: orbita_payments
     environment:
-        SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/payments_db
-        SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/payments_db
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     depends_on:
-      - postgres
-      - kafka
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
 
 volumes:
   pg_data:

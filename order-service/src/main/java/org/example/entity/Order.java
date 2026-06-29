@@ -24,7 +24,7 @@ public class Order {
     private UUID id;
 
     @Column(name = "user_id", nullable = false)
-    private String useId;
+    private String userId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "product_type", nullable = false)

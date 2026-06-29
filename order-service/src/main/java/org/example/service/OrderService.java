@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -35,7 +36,7 @@ public class OrderService {
         }
 
         Order order = new Order();
-        order.setUseId(userId);
+        order.setUserId(userId);
         order.setProductType(request.productType());
         order.setPrice(request.price());
         order.setPayload(request.payload());
@@ -45,7 +46,7 @@ public class OrderService {
         OrderPaymentRequestedEvent orderPayEvent = new OrderPaymentRequestedEvent(
                 UUID.randomUUID(),
                 savedOrder.getId(),
-                savedOrder.getUseId(),
+                savedOrder.getUserId(),
                 savedOrder.getPrice(),
                 Instant.now()
         );
@@ -106,4 +107,25 @@ public class OrderService {
         orderRepository.save(order);
         log.info("Статус заказа: {} Причина: {} ", order.getOrderStatus(), order.getFailureReason());
     }
+
+    @Transactional(readOnly = true)
+    public List<Order> getAllOrders(String userId){
+        return orderRepository.findByUserId(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public OrderStatusResponse getStatusOrder(UUID orderId){
+        Order curOrder = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("ORDER_NOT_FOUND"));
+
+        return  new OrderStatusResponse(
+                curOrder.getId(),
+                curOrder.getOrderStatus(),
+                curOrder.getProductType(),
+                curOrder.getPrice(),
+                curOrder.getFailureReason(),
+                curOrder.getCreatedAt()
+        );
+    }
+
 }

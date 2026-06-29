@@ -15,26 +15,28 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public class OrderPaymentListener {
 
+    private final String TOPIC_COMPLETE = "payment-completed-events";
+    private final String TOPIC_FAILED = "payment-failed-events";
 
     private final OrderService orderService;
     private final ObjectMapper objectMapper;
 
-    @KafkaListener(topics = "payment-complete-event", groupId = "orders-service-group")
+    @KafkaListener(topics = TOPIC_COMPLETE, groupId = "orders-service-group")
     public void onPaymentComplete(String message){
         try {
-            log.info("Получено сообщение об успешной оплате: {}", message);
             OrderPaymentCompletedEvent completedEvent = objectMapper.readValue(message, OrderPaymentCompletedEvent.class);
+            log.info("Получено сообщение об успешной оплате заказа: {}", completedEvent.orderId());
             orderService.processPaymentCompletion(completedEvent);
         }catch (Exception e) {
             log.error("Ошибка при получении успешной оплаты: {} ", e.getMessage());
         }
     }
 
-    @KafkaListener(topics = "payment-failure-event", groupId = "orders-service-group" )
+    @KafkaListener(topics = TOPIC_FAILED, groupId = "orders-service-group" )
     public void onPaymentFailure(String message){
         try {
-            log.info("Получено сообщение об ошибке при оплате: " + message);
             OrderPaymentFailedEvent failedEvent = objectMapper.readValue(message, OrderPaymentFailedEvent.class);
+            log.info("Получено сообщение об ошибке при оплате, Причина: " + failedEvent.reason());
             orderService.processPaymentFailure(failedEvent);
         }catch (Exception e){
             log.error("Ошибка при обработке ошибки оплаты: {}", e.getMessage());

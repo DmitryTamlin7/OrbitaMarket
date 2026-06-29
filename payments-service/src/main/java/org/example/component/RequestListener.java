@@ -1,6 +1,8 @@
 package org.example.component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.dto.OrderPaymentRequestedEvent;
@@ -11,10 +13,12 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @AllArgsConstructor
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class RequestListener {
 
     private final PaymentService paymentService;
     private final ObjectMapper objectMapper;
+
 
     @KafkaListener(topics = "order-payment-request", groupId = "payment-service")
     public void onPaymentRequested(String massage){

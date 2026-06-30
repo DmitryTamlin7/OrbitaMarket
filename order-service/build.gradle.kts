@@ -11,8 +11,8 @@ repositories {
     mavenCentral()
 }
 
-tasks.bootJar {
-    mainClass.set("org.example.PaymentsApplication")
+springBoot {
+    mainClass.set("org.example.OrderApplication")
 }
 
 val allureVersion = "2.24.0"
@@ -59,5 +59,9 @@ allure {
 tasks.test {
     useJUnitPlatform()
     systemProperty("allure.results.directory", layout.buildDirectory.dir("allure-results").get().asFile.absolutePath)
+}
+
+tasks.getByName<Jar>("jar") {
+    enabled = false
 }
 

@@ -7,15 +7,15 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: payments-service
-          uri: http://localhost:8081
+        - id: order-service
+          uri: ${ORDER_SERVICE_URL:http://localhost:8081}
           predicates:
-            - Path=/payments/**, /api/v1/payments/**
+            - Path=/api/v1/orders/**
 
-        - id: orders-service
-          uri: http://localhost:8082
+        - id: payments-service
+          uri: ${PAYMENTS_SERVICE_URL:http://localhost:8082}
           predicates:
-            - Path=/orders/**, /api/v1/orders/**
+            - Path=/api/v1/payments/**
 
 logging:
   level:

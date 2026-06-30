@@ -1,2 +1,2 @@
-create DATABASE orders_db
-create DATABASE payments_db
+create DATABASE order_db;
+create DATABASE payments_db;

@@ -1,20 +1,20 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
+import { jUnit, textSummary } from 'https://jslib.k6.io/k6-summary/0.0.2/index.js';
 
 export const options = {
     stages: [
-        { duration: '10s', target: 10 }, // Быстрый разгон до 10 пользователей
-        { duration: '30s', target: 10 }, // Держим нагрузку 30 секунд
-        { duration: '10s', target: 0 },  // Плавный спад
+        { duration: '10s', target: 10 },
+        { duration: '30s', target: 10 },
+        { duration: '10s', target: 0 },
     ],
     thresholds: {
-        http_req_failed: ['rate<0.01'],   // Ошибок должно быть меньше 1%
-        http_req_duration: ['p(95)<200'], // 95% запросов должны уложиться в 200 мс
+        http_req_failed: ['rate<0.01'],
+        http_req_duration: ['p(95)<200'],
     },
 };
 
 export default function () {
-    // ВАЖНО: меняем order-service на localhost
     const url = 'http://localhost:8080/api/v1/orders';
 
     const payload = JSON.stringify({
@@ -51,4 +51,11 @@ export default function () {
     });
 
     sleep(1);
+}
+
+export function handleSummary(data) {
+    return {
+        'stdout': textSummary(data, { indent: ' ', enableColors: true }),
+        '../allure-results/k6-load-results.xml': jUnit(data),
+    };
 }

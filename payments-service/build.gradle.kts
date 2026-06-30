@@ -57,3 +57,7 @@ tasks.test {
     useJUnitPlatform()
     systemProperty("allure.results.directory", layout.buildDirectory.dir("allure-results").get().asFile.absolutePath)
 }
+
+tasks.getByName<Jar>("jar") {
+    enabled = false
+}

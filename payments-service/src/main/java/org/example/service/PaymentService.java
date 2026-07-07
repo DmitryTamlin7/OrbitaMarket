@@ -8,11 +8,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.component.KafkaBrokerClient;
 import org.example.dto.*;
 import org.example.entity.Account;
+import org.example.entity.ProcessedOrder;
 import org.example.exception.AccountNotFoundException;
 import org.example.exception.InvalidAmountException;
 import org.example.repository.AccountRepository;
+import org.example.repository.ProcessedOrderRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,6 +26,7 @@ public class PaymentService {
     private final AccountRepository accountRepository;
     private final ObjectMapper objectMapper;
     private final KafkaBrokerClient kafkaBrokerClient;
+    private final ProcessedOrderRepository processedOrderRepository;
 
     private final String TOPIC_COMPLETE = "payment-completed-events";
     private final String TOPIC_FAILED = "payment-failed-events";
@@ -68,12 +72,18 @@ public class PaymentService {
     public void processPayment(OrderPaymentRequestedEvent event){
         log.info("Обработка платежа из заказа: {}, пользователя: {}", event.orderId(), event.userId());
 
+        if (processedOrderRepository.existsById(event.orderId())){
+            log.warn("Повторное событие! Заказ {} Уже оплачен", event.orderId());
+            return;
+        }
+
         Account account = accountRepository.findByUserId(event.userId())
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
 
         if (account.getBalance() >= event.amount()) {
             account.setBalance(account.getBalance() - event.amount());
             accountRepository.save(account);
+            processedOrderRepository.save(new ProcessedOrder(event.orderId(), LocalDateTime.now()));
             OrderPaymentCompletedEvent successEvent = new OrderPaymentCompletedEvent(
                     UUID.randomUUID(),
                     event.orderId(),

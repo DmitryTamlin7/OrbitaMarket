@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.example.dto.CreateOrderRequest;
 import org.example.dto.ErrorResponse;
@@ -61,7 +62,7 @@ public class OrderController {
     })
     public ResponseEntity<List<Order>> getOrdersById(
             @Parameter(description = "ID пользователя для фильтрации", required = true)
-            @RequestHeader("X-User_Id") String userId){
+            @RequestHeader("X-User-Id") String userId){
         List<Order> orderList = orderService.getAllOrders(userId);
         return ResponseEntity.ok(orderList);
     }

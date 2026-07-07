@@ -1,8 +1,19 @@
-payments-service/build
-order-service/build
-payments-service/.gradle
-order-service/.gradle
-payments-service/gradle
-order-service/gradle
-.idea
+# Скомпилированные файлы и билды (для всех подмодулей сразу)
+**/build/
+**/target/
+*.jar
+*.war
+
+# Системные файлы сборщика Gradle
+**/.gradle/
+/gradle/
+gradlew
+gradlew.bat
+
+# Конфигурации IDE (IntelliJ IDEA)
+.idea/
+*.iml
+*.iws
+
+# Секреты и локальные файлы
 passwords.txt

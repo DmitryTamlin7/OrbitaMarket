@@ -12,7 +12,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/orbitaMarketPay
     username: postgres
-    password: ${DB_PASSWORD:***REMOVED***}
+    password: ${DB_PASSWORD:Soadsvanpjz228123}
     driver-class-name: org.postgresql.Driver
 
 

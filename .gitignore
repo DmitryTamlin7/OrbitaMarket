@@ -17,3 +17,8 @@ gradlew.bat
 
 # Секреты и локальные файлы
 passwords.txt
+
+
+# Отчеты безопасности
+SecureReports/
+gitleaks-report.json

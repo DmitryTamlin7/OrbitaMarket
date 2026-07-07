@@ -4,3 +4,5 @@ payments-service/.gradle
 order-service/.gradle
 payments-service/gradle
 order-service/gradle
+.idea
+passwords.txt

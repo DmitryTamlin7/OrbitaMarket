@@ -1,6 +1,6 @@
 package org.example.exception;
 
-
+import jakarta.persistence.EntityNotFoundException;
 import org.example.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +30,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(OrderNotFoundException.class)
     public ResponseEntity<ErrorResponse> handlerOrderNotFound(OrderNotFoundException exception){
+        return buildResponse("ORDER_NOT_FOUND", exception.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlerEntityNotFound(EntityNotFoundException exception){
         return buildResponse("ORDER_NOT_FOUND", exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 

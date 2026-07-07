@@ -20,6 +20,7 @@
     <orderEntry type="library" name="Gradle: org.springframework.boot:spring-boot-starter-test:3.2.5" level="project" />
     <orderEntry type="library" name="Gradle: org.junit.jupiter:junit-jupiter:5.10.2" level="project" />
     <orderEntry type="library" name="Gradle: org.springframework.kafka:spring-kafka-test:3.1.4" level="project" />
+    <orderEntry type="library" name="Gradle: io.qameta.allure:allure-junit5:2.25.0" level="project" />
     <orderEntry type="library" name="Gradle: org.springframework.boot:spring-boot-starter-json:3.2.5" level="project" />
     <orderEntry type="library" name="Gradle: org.springframework.boot:spring-boot-starter:3.2.5" level="project" />
     <orderEntry type="library" name="Gradle: org.springframework:spring-webmvc:6.1.6" level="project" />
@@ -67,6 +68,7 @@
     <orderEntry type="library" name="Gradle: org.apache.kafka:kafka_2.13:test:3.6.2" level="project" />
     <orderEntry type="library" name="Gradle: org.apache.kafka:kafka-streams-test-utils:3.6.2" level="project" />
     <orderEntry type="library" name="Gradle: org.apache.kafka:kafka-metadata:3.6.2" level="project" />
+    <orderEntry type="library" name="Gradle: io.qameta.allure:allure-junit-platform:2.25.0" level="project" />
     <orderEntry type="library" name="Gradle: com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.16.2" level="project" />
     <orderEntry type="library" name="Gradle: com.fasterxml.jackson.module:jackson-module-parameter-names:2.16.2" level="project" />
     <orderEntry type="library" name="Gradle: com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.2" level="project" />
@@ -116,6 +118,7 @@
     <orderEntry type="library" name="Gradle: commons-io:commons-io:2.11.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: org.scala-lang:scala-library:2.13.11" level="project" />
     <orderEntry type="library" name="Gradle: org.apache.kafka:kafka-streams:3.6.2" level="project" />
+    <orderEntry type="library" name="Gradle: io.qameta.allure:allure-java-commons:2.25.0" level="project" />
     <orderEntry type="library" name="Gradle: com.fasterxml.jackson.core:jackson-core:2.16.2" level="project" />
     <orderEntry type="library" name="Gradle: com.fasterxml.jackson.core:jackson-annotations:2.16.2" level="project" />
     <orderEntry type="library" name="Gradle: org.apache.logging.log4j:log4j-to-slf4j:2.21.1" level="project" />
@@ -130,6 +133,7 @@
     <orderEntry type="library" name="Gradle: io.netty:netty-common:4.1.109.Final" level="project" />
     <orderEntry type="library" name="Gradle: io.netty:netty-transport-classes-epoll:4.1.109.Final" level="project" />
     <orderEntry type="library" name="Gradle: org.rocksdb:rocksdbjni:7.9.2" level="project" />
+    <orderEntry type="library" name="Gradle: io.qameta.allure:allure-model:2.25.0" level="project" />
     <orderEntry type="library" name="Gradle: org.apache.logging.log4j:log4j-api:2.21.1" level="project" />
     <orderEntry type="library" name="Gradle: com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.16.2" level="project" />
     <orderEntry type="library" name="Gradle: io.swagger.core.v3:swagger-models-jakarta:2.2.21" level="project" />
@@ -167,6 +171,7 @@
     <orderEntry type="library" scope="RUNTIME" name="Gradle: commons-cli:commons-cli:1.4" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.scala-lang:scala-library:2.13.12" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.pcollections:pcollections:4.0.1" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: io.qameta.allure:allure-test-filter:2.25.0" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.hdrhistogram:HdrHistogram:2.1.12" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.latencyutils:LatencyUtils:2.0.3" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.glassfish.jaxb:jaxb-core:4.0.5" level="project" />

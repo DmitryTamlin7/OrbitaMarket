@@ -9,9 +9,11 @@ import java.math.BigInteger;
 import java.util.UUID;
 
 /**
- * Создаем энтити аккаунт делаем только геттер
- * потому что сеттер на все нам не нужен а "@DATA" делает другие служебные методы
- * такие как hashcode equals которые нам не нужны
+ * сущность финансового счета пользователя в системе OrbitaMarket.
+ * Инкапсулирует баланс расчетных единиц (geocredits).
+ *  Использование аннотации @Data намеренно избегается для предотвращения автоматической
+ * генерации неоптимальных методов hashCode/equals и избыточных мутаторов (сеттеров),
+ * что гарантирует контролируемое изменение состояния счета только через выделенные методы.
  */
 @Entity
 @Table(name = "accounts")
@@ -29,14 +31,24 @@ public class Account {
     @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
     private Long balance = 0L;
 
+    /**
+     * Версия сущности для реализации механизма оптимистичной блокировки (Optimistic Locking).
+     * Защищает баланс от состояния гонки (Race Condition) при одновременных запросах на списание/пополнение.
+     */
     @Version
     private Long version;
 
-    public Account(String user_id) {
-        this.userId = user_id;
+    /**
+     * Конструктор первичной инициализации счета пользователя.
+     */
+    public Account(String userId) {
+        this.userId = userId;
         this.balance = 0L;
     }
 
+    /**
+     * Явный сеттер для контролируемого изменения баланса бизнес-логикой процессора.
+     */
     public void setBalance(Long balance) {
         this.balance = balance;
     }

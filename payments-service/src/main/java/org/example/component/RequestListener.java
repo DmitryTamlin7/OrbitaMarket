@@ -10,6 +10,10 @@ import org.example.service.PaymentService;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+/**
+ * Входной обработчик асинхронных платежных запросов (Kafka Message Consumer).
+ * Реализует реактивное получение событий инициализации транзакций
+ */
 @Slf4j
 @Component
 @AllArgsConstructor
@@ -19,7 +23,13 @@ public class RequestListener {
     private final PaymentService paymentService;
     private final ObjectMapper objectMapper;
 
-
+    /**
+     * Асинхронный слушатель событий на списание средств за пакеты ДЗЗ.
+     * Вычитывает сырой JSON-payload из брокера, десериализует его в контракт
+     * OrderPaymentRequestedEvent и передает управление бизнес-логике процессинга.
+     *
+     * @param massage Сериализованный JSON-строка payload из топика Kafka
+     */
     @KafkaListener(topics = "order-payment-request", groupId = "payment-service")
     public void onPaymentRequested(String massage){
         try {

@@ -21,6 +21,11 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Сервис процессинга OrbitaMarket.
+ * Управляет балансами внутренних расчетных единиц (geocredits) пользователей
+ * и обеспечивает транзакционную безопасность при обработке платежных событий.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -33,6 +38,11 @@ public class PaymentService {
     private final String TOPIC_COMPLETE = "payment-completed-events";
     private final String TOPIC_FAILED = "payment-failed-events";
 
+    /**
+     * Идемпотентная инициализация финансового счета пользователя.
+     * Возвращает существующий аккаунт либо безопасно инициализирует новый
+     * с нулевым стартовым балансом geocredits.
+     */
     public AccountBalanceDto createAccount(String userId){
         Optional<Account> existAccount = accountRepository.findByUserId(userId);
         if (existAccount.isPresent()){
@@ -47,6 +57,10 @@ public class PaymentService {
         return new AccountBalanceDto(userId, savedAccount.getBalance(), "geocredits");
     }
 
+    /**
+     * Запрос текущего остатка средств на счете.
+     * Использует паттерн Cache-Aside: кэширует результат по ключу userId для разгрузки СУБД.
+     */
     @Cacheable(value = "balances", key = "#userId")
     public AccountBalanceDto getBalance(String userId) {
         Account existAccount = accountRepository.findByUserId(userId)
@@ -56,7 +70,10 @@ public class PaymentService {
 
     }
 
-
+    /**
+     * Пополнение счета (депозит).
+     * Изменяет состояние баланса в БД и инвалидирует (очищает) устаревшее значение в кэше.
+     */
     @CacheEvict(value = "balances", key = "#useId")
     @Transactional
     public AccountBalanceDto topUp(String userId, Long amount){
@@ -73,6 +90,11 @@ public class PaymentService {
         return new AccountBalanceDto(newBalance.getUserId(), newBalance.getBalance(), "geocredits");
     }
 
+    /**
+     * Обработка входящего запроса на списание средств по заказу.
+     * Реализует паттерн дедупликации (Double Spending Protection): проверяет orderId по таблице
+     * уже обработанных транзакций. На основе баланса публикует событие успеха или отказа в Kafka.
+     */
     @CacheEvict(value = "balances", key = "#event.userId")
     @Transactional
     public void processPayment(OrderPaymentRequestedEvent event){

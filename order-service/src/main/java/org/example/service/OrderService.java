@@ -22,15 +22,30 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Сервис оркестрации жизненного цикла заказов  OrbitaMarket
+ * Обеспечивает управление сделками ДЗЗ, гарантированную доставку событий
+ * через паттерн Transactional Outbox и резидентное кэширование данных.
+ */
 @Slf4j
 @Service
 @AllArgsConstructor
 public class OrderService {
 
-    private OrderRepository orderRepository;
-    private OutBoxEventRepository outBoxEventRepository;
+    private final OrderRepository orderRepository;
+    private final OutBoxEventRepository outBoxEventRepository;
     private final ObjectMapper objectMapper;
 
+
+    /**
+     * Регистрация нового заказа и инициализация асинхронного процесса биллинга.
+     * Валидирует ценообразование, сохраняет сущность в БД и фиксирует ивент оплаты
+     * в Outbox-таблице в рамках единой ACID-транзакции. Результат кэшируется (Pre-heating).
+     *
+     * @param userId  Идентификатор авторизованного пользователя (из заголовка X-User-Id)
+     * @param request Полиморфный payload параметров спутниковой съемки и метаданных
+     * @return DTO с подтверждением успешной регистрации и статусом PAYMENT_PENDING
+     */
     @CachePut(value = "orders", key = "#result.id")
     @Transactional
     public OrderResponse createOrder(String userId, CreateOrderRequest request){
@@ -76,6 +91,12 @@ public class OrderService {
         );
     }
 
+
+    /**
+     * Асинхронная обработка успешного прохождения биллинга из брокера событий.
+     * Верифицирует текущее состояние конечного автомата (State Machine) заказа,
+     * переводит его в статус PAID и инвалидирует устаревший кэш (Cache Eviction).
+     */
     @CacheEvict(value = "orders", key = "#event.orderId()")
     @Transactional
     public void processPaymentCompletion(OrderPaymentCompletedEvent event){
@@ -88,7 +109,7 @@ public class OrderService {
         }
 
         if (!order.getOrderStatus().equals(OrderStatus.PAYMENT_PENDING)){
-            log.info("Заказ из статуса {} невозможно оплатить", OrderStatus.PAYMENT_PENDING);
+            log.info("Заказ из статуса {} невозможно оплатить", order.getOrderStatus());
             return;
         }
 
@@ -97,6 +118,12 @@ public class OrderService {
         log.info("Статус заказа PAID. Заказ {} созранен", order.getId());
     }
 
+
+    /**
+     * Асинхронная обработка падения или отклонения транзакции платежной системой.
+     * Переводит заказ в финальное состояние PAYMENT_FAILED, фиксирует причину отказа
+     * (например, INSUFFICIENT_BALANCE) и очищает кэш.
+     */
     @CacheEvict(value = "orders", key = "#event.orderId()")
     @Transactional
     public void processPaymentFailure(OrderPaymentFailedEvent event){
@@ -114,11 +141,23 @@ public class OrderService {
         log.info("Статус заказа: {} Причина: {} ", order.getOrderStatus(), order.getFailureReason());
     }
 
+
+    /**
+     * Получение истории всех заказов пользователя.
+     * Выполняется в неблокирующей транзакции (Read-Only) для минимизации нагрузки на СУБД.
+     */
     @Transactional(readOnly = true)
     public List<Order> getAllOrders(String userId){
         return orderRepository.findByUserId(userId);
     }
 
+
+
+    /**
+     * Запрос актуального статуса конкретного заказа.
+     * Реализует паттерн ленивого чтения (Cache-Aside): при промахе кэша подтягивает
+     * данные прямо из PostgreSQL.
+     */
     @Transactional(readOnly = true)
     public OrderStatusResponse getStatusOrder(UUID orderId){
         Order curOrder = orderRepository.findById(orderId)

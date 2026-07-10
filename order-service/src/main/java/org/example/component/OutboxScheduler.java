@@ -10,6 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+
+/**
+ * Планировщик публикации событий по паттерну Transactional Outbox
+ * Обеспечивает гарантированную доставку сообщений (At-Least-Once Delivery) в брокер Kafka,
+ * полностью исключая рассинхронизацию между состоянием БД и шиной данных при падении сети.
+ */
 @Slf4j
 @Component
 @AllArgsConstructor
@@ -18,6 +24,12 @@ public class OutboxScheduler {
     private final OutBoxEventRepository outBoxEventRepository;
     private final KafkaMessageBrokerClient brokerClient;
 
+    /**
+     * Фоновая задача периодического опроса Outbox-таблицы
+     * Вычитывает необработанные события строго в хронологическом порядке (FIFO).
+     * При успешной отправке в Kafka отмечает событие как обработанное
+     * При сбое сети транзакция откатывается, а цикл прерывается для сохранения строгого порядка
+     */
     @Scheduled(fixedDelay = 1500)
     @Transactional
     public void processedOutboxEvent(){
@@ -39,9 +51,5 @@ public class OutboxScheduler {
                 break;
             }
         }
-
-
-
     }
-
 }

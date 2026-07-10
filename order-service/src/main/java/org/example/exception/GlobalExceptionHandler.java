@@ -10,35 +10,50 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
 
+/**
+ * Централизованный перехватчик исключений слоя REST-контроллеров.
+ * Транслирует внутренние бизнес-исключения и ошибки валидации в унифицированный
+ * формат ответов ErrorResponse со строгими HTTP-статусами.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * Перехват ошибок некорректного заполнения полиморфных геометрических параметров (AOI).
+     */
     @ExceptionHandler(InvalidPayloadException.class)
     public ResponseEntity<ErrorResponse> handlerInvalidPayload(InvalidPayloadException exception){
         return buildResponse("INVALID_PAYLOAD", exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Отклонение транзакций с отрицательной, нулевой или невалидной ценой.
+     */
     @ExceptionHandler(InvalidPriceException.class)
     public ResponseEntity<ErrorResponse> handlerInvalidPrice(InvalidPriceException exception) {
         return buildResponse("INVALID_PRICE", exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Обработка запросов с неизвестными или неподдерживаемыми спецификациями продуктов.
+     */
     @ExceptionHandler(UnknownProductTypeException.class)
     public ResponseEntity<ErrorResponse> handlerUnknownProductType(UnknownProductTypeException exception) {
         return buildResponse("UNKNOWN_PRODUCT_TYPE", exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(OrderNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handlerOrderNotFound(OrderNotFoundException exception){
+    /**
+     * Обработка запросов на получение статуса несуществующего UUID заказа.
+     */
+    @ExceptionHandler({OrderNotFoundException.class, EntityNotFoundException.class})
+    public ResponseEntity<ErrorResponse> handlerOrderNotFound(Exception exception){
         return buildResponse("ORDER_NOT_FOUND", exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handlerEntityNotFound(EntityNotFoundException exception){
-        return buildResponse("ORDER_NOT_FOUND", exception.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
+    /**
+     * Контроль сквозной авторизации. Перехватывает отсутствие обязательных метаданных,
+     * генерируя строго регламентированный API Gateway контракт ошибки "Header X-User_id NOT FOUND".
+     */
     @ExceptionHandler(MissingRequestHeaderException.class)
     public ResponseEntity<ErrorResponse> handlerMissingHeader(MissingRequestHeaderException exception){
         if ("X-User-Id".equals(exception.getHeaderName())){
@@ -50,7 +65,9 @@ public class GlobalExceptionHandler {
         return buildResponse("INTERNAL_ERROR", "Unknown header error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-
+    /**
+     * Внутренний фабричный метод сборки иммутабельной обертки ответа об ошибке.
+     */
     private ResponseEntity<ErrorResponse> buildResponse(String errorCode, String message, HttpStatus status){
         ErrorResponse response = new ErrorResponse(errorCode, message, Instant.now());
         return ResponseEntity.status(status).body(response);

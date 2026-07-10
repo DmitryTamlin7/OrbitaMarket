@@ -10,6 +10,11 @@ import org.example.service.OrderService;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+/**
+ * Асинхронный потребитель сообщений (Kafka Message Consumer) платежного домена.
+ * Отвечает за обработку результатов процессинга биллинга и
+ * вызывает метод нужного статуса
+ */
 @Slf4j
 @Component
 @AllArgsConstructor
@@ -21,6 +26,10 @@ public class OrderPaymentListener {
     private final OrderService orderService;
     private final ObjectMapper objectMapper;
 
+    /**
+     * Обработчик событий успешного списания денежных средств со счета пользователя.
+     * Десериализует входящий payload и запускает процесс финализации статуса сделки (PAID).
+     */
     @KafkaListener(topics = TOPIC_COMPLETE, groupId = "orders-service-group")
     public void onPaymentComplete(String message){
         try {
@@ -32,6 +41,10 @@ public class OrderPaymentListener {
         }
     }
 
+    /**
+     * Обработчик событий отклонения транзакции или нехватки баланса.
+     * Десериализует payload ошибки и фиксирует статус PAYMENT_FAILED с записью причины в лог и БД.
+     */
     @KafkaListener(topics = TOPIC_FAILED, groupId = "orders-service-group" )
     public void onPaymentFailure(String message){
         try {

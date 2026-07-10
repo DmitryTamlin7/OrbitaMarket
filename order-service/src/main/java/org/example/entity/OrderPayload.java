@@ -4,6 +4,11 @@ package org.example.entity;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+/**
+ * Базовый интерфейс полиморфной полезной нагрузки (Payload) заказов OrbitaMarket.
+ * Настраивает библиотеку Jackson на динамическое разрешение конкретных Java-структур
+ * данных ДЗЗ на основе строкового поля-дискриминатора "product_type".
+ */
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,

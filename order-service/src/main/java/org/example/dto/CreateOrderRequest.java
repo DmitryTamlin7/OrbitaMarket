@@ -6,6 +6,10 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import org.example.entity.*;
 
+/**
+ * Входной DTO-контракт  для создания заказа на продукты космического мониторинга
+ * Обеспечивает автоматический маппинг полей из snake_case
+ */
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record CreateOrderRequest(
         ProductType productType,

@@ -12,6 +12,10 @@ import org.hibernate.validator.constraints.br.CPF;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Сущность, представляющая  заказ на данные ДЗЗ.
+ * Содержит системные финансовые атрибуты и полиморфную полезную нагрузку.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -41,6 +45,10 @@ public class Order {
     @Column(name = "failure_reason")
     private FailureReason failureReason;
 
+    /**
+     * Специфические метаданные заказа спутниковой съемки.
+     * Хранятся в СУБД PostgreSQL в виде бинарного оптимизированного типа JSONB.
+     */
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "payload", columnDefinition = "jsonb")
     private OrderPayload payload;
@@ -49,6 +57,9 @@ public class Order {
     private Instant createdAt;
 
 
+    /**
+     * Автоматическая фиксация времени транзакции перед первичной записью в СУБД.
+     */
     @PrePersist
     protected void onCreate(){
         this.createdAt = Instant.now();

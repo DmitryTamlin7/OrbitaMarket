@@ -13,6 +13,8 @@ import org.example.entity.OutboxEvent;
 import org.example.entity.OutboxEventType;
 import org.example.repository.OrderRepository;
 import org.example.repository.OutBoxEventRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,7 @@ public class OrderService {
     private OutBoxEventRepository outBoxEventRepository;
     private final ObjectMapper objectMapper;
 
+    @CachePut(value = "orders", key = "#result.id")
     @Transactional
     public OrderResponse createOrder(String userId, CreateOrderRequest request){
         if (request.price() == null || request.price() <= 0){
@@ -73,6 +76,7 @@ public class OrderService {
         );
     }
 
+    @CacheEvict(value = "orders", key = "#event.orderId()")
     @Transactional
     public void processPaymentCompletion(OrderPaymentCompletedEvent event){
         Order order = orderRepository.findById(event.orderId())
@@ -93,6 +97,7 @@ public class OrderService {
         log.info("Статус заказа PAID. Заказ {} созранен", order.getId());
     }
 
+    @CacheEvict(value = "orders", key = "#event.orderId()")
     @Transactional
     public void processPaymentFailure(OrderPaymentFailedEvent event){
         Order order = orderRepository.findById(event.orderId())

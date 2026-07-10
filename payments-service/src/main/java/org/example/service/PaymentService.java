@@ -13,6 +13,8 @@ import org.example.exception.AccountNotFoundException;
 import org.example.exception.InvalidAmountException;
 import org.example.repository.AccountRepository;
 import org.example.repository.ProcessedOrderRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -45,6 +47,7 @@ public class PaymentService {
         return new AccountBalanceDto(userId, savedAccount.getBalance(), "geocredits");
     }
 
+    @Cacheable(value = "balances", key = "#userId")
     public AccountBalanceDto getBalance(String userId) {
         Account existAccount = accountRepository.findByUserId(userId)
                 .orElseThrow( () -> new AccountNotFoundException("Аккаунт не найден для: " + userId ));
@@ -53,6 +56,8 @@ public class PaymentService {
 
     }
 
+
+    @CacheEvict(value = "balances", key = "#useId")
     @Transactional
     public AccountBalanceDto topUp(String userId, Long amount){
         if (amount <= 0){
@@ -68,6 +73,7 @@ public class PaymentService {
         return new AccountBalanceDto(newBalance.getUserId(), newBalance.getBalance(), "geocredits");
     }
 
+    @CacheEvict(value = "balances", key = "#event.userId")
     @Transactional
     public void processPayment(OrderPaymentRequestedEvent event){
         log.info("Обработка платежа из заказа: {}, пользователя: {}", event.orderId(), event.userId());

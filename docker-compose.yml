@@ -10,13 +10,14 @@ services:
       POSTGRES_DB: orbita_db
     ports:
       - "5432:5432"
-
     read_only: true
     security_opt:
       - no-new-privileges:true
     tmpfs:
       - /tmp
+      - /var/run/postgresql
       - /run/postgresql
+
     volumes:
       - pg_data:/var/lib/postgresql/data
       - ./infrastructure/db-init:/docker-entrypoint-initdb.d
@@ -25,7 +26,6 @@ services:
       interval: 3s
       timeout: 3s
       retries: 10
-
 
   kafka:
     image: apache/kafka:3.8.0
@@ -46,12 +46,15 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
 
-    read_only: true
+      KAFKA_COMPRESSION_TYPE: lz4
     security_opt:
       - no-new-privileges:true
+    read_only: true
     tmpfs:
-      - /tmp
-
+      - /tmp:size=1G,mode=1777,exec
+      - /var/run:size=256M,mode=1777
+      - /opt/kafka/config:size=128M,mode=1777
+      - /opt/kafka/logs:size=512M,mode=1777   # ← Добавь эту строку
     volumes:
       - kafka_data:/var/lib/kafka/data
     healthcheck:
@@ -95,9 +98,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-
-
-
 volumes:
   pg_data:
   kafka_data:

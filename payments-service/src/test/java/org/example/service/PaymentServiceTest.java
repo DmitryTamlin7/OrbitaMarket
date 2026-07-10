@@ -1,5 +1,6 @@
 package org.example.service;
 
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.example.component.KafkaBrokerClient;
@@ -8,6 +9,7 @@ import org.example.entity.Account;
 import org.example.exception.AccountNotFoundException;
 import org.example.exception.InvalidAmountException;
 import org.example.repository.AccountRepository;
+import org.example.repository.ProcessedOrderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -36,6 +38,8 @@ class PaymentServiceTest {
     private ObjectMapper objectMapper;
     @Mock
     private KafkaBrokerClient kafkaBrokerClient;
+    @Mock
+    private ProcessedOrderRepository processedOrderRepository;
 
     @InjectMocks
     private PaymentService paymentService;
@@ -157,24 +161,24 @@ class PaymentServiceTest {
         @BeforeEach
         void initId() {
             orderId = UUID.randomUUID();
+            lenient().when(processedOrderRepository.existsById(any(UUID.class))).thenReturn(false);
         }
 
         @Test
         @DisplayName("Достаточно средств — списать баланс и отправить OrderPaymentCompletedEvent")
         void processPayment_Success() {
-
-            OrderPaymentRequestedEvent mockEvent = mock(OrderPaymentRequestedEvent.class);
-            when(mockEvent.orderId()).thenReturn(orderId);
-            when(mockEvent.userId()).thenReturn(USER_ID);
-
-
-            doReturn(40).when(mockEvent).amount();
+            OrderPaymentRequestedEvent realEvent = new OrderPaymentRequestedEvent(
+                    UUID.randomUUID(),
+                    orderId,
+                    USER_ID,
+                    40,
+                    java.time.Instant.now()
+            );
 
             when(accountRepository.findByUserId(USER_ID)).thenReturn(Optional.of(existingAccount));
 
 
-            paymentService.processPayment(mockEvent);
-
+            paymentService.processPayment(realEvent);
 
             assertEquals(60L, (long) existingAccount.getBalance());
             verify(accountRepository, times(1)).save(existingAccount);
@@ -191,18 +195,18 @@ class PaymentServiceTest {
         @Test
         @DisplayName("Недостаточно средств — не изменять баланс и отправить OrderPaymentFailedEvent")
         void processPayment_InsufficientBalance() {
-
-            OrderPaymentRequestedEvent mockExpensiveEvent = mock(OrderPaymentRequestedEvent.class);
-            when(mockExpensiveEvent.orderId()).thenReturn(orderId);
-            when(mockExpensiveEvent.userId()).thenReturn(USER_ID);
-
-
-            doReturn(150).when(mockExpensiveEvent).amount();
+            OrderPaymentRequestedEvent realExpensiveEvent = new OrderPaymentRequestedEvent(
+                    UUID.randomUUID(),
+                    orderId,
+                    USER_ID,
+                    150,
+                    java.time.Instant.now()
+            );
 
             when(accountRepository.findByUserId(USER_ID)).thenReturn(Optional.of(existingAccount));
 
 
-            paymentService.processPayment(mockExpensiveEvent);
+            paymentService.processPayment(realExpensiveEvent);
 
 
             assertEquals(100L, (long) existingAccount.getBalance());
@@ -220,13 +224,18 @@ class PaymentServiceTest {
         @Test
         @DisplayName("Пользователь не найден при обработке ивента — выбросить EntityNotFoundException")
         void processPayment_UserNotFound_ThrowsException() {
-            OrderPaymentRequestedEvent mockEvent = mock(OrderPaymentRequestedEvent.class);
-            when(mockEvent.userId()).thenReturn(USER_ID);
+            OrderPaymentRequestedEvent realEvent = new OrderPaymentRequestedEvent(
+                    UUID.randomUUID(),
+                    orderId,
+                    USER_ID,
+                    40,
+                    java.time.Instant.now()
+            );
 
             when(accountRepository.findByUserId(USER_ID)).thenReturn(Optional.empty());
 
             assertThrows(EntityNotFoundException.class, () ->
-                    paymentService.processPayment(mockEvent)
+                    paymentService.processPayment(realEvent)
             );
             verifyNoInteractions(kafkaBrokerClient);
         }

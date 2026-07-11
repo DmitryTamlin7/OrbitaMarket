@@ -46,7 +46,7 @@ public class OrderService {
      * @param request Полиморфный payload параметров спутниковой съемки и метаданных
      * @return DTO с подтверждением успешной регистрации и статусом PAYMENT_PENDING
      */
-    @CachePut(value = "orders", key = "#result.id")
+    @CachePut(value = "orders", key = "#result.orderId")
     @Transactional
     public OrderResponse createOrder(String userId, CreateOrderRequest request){
         if (request.price() == null || request.price() <= 0){

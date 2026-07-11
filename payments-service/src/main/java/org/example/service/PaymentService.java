@@ -74,7 +74,7 @@ public class PaymentService {
      * Пополнение счета (депозит).
      * Изменяет состояние баланса в БД и инвалидирует (очищает) устаревшее значение в кэше.
      */
-    @CacheEvict(value = "balances", key = "#useId")
+    @CacheEvict(value = "balances", key = "#userId")
     @Transactional
     public AccountBalanceDto topUp(String userId, Long amount){
         if (amount <= 0){

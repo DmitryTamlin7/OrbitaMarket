@@ -54,7 +54,7 @@ services:
       - /tmp:size=1G,mode=1777,exec
       - /var/run:size=256M,mode=1777
       - /opt/kafka/config:size=128M,mode=1777
-      - /opt/kafka/logs:size=512M,mode=1777   # ← Добавь эту строку
+      - /opt/kafka/logs:size=512M,mode=1777
     volumes:
       - kafka_data:/var/lib/kafka/data
     healthcheck:
@@ -62,6 +62,24 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: orbita_kafka_ui
+    ports:
+      - "8089:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    depends_on:
+      kafka:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:size=256M,mode=1777
+      - /var/run:size=128M,mode=1777
 
   api-gateway:
     build: ./api-gateway

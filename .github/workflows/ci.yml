@@ -1,0 +1,38 @@
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: [ "main"]
+  pull_request:
+    branches: [ "main"]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Build and Test API Gateway
+        run: gradle build
+        working-directory: ./api-gateway
+
+      - name: Build and Test Payments Service
+        run: gradle build
+        working-directory: ./payments-service
+
+      - name: Build and Test Order Service
+        run: gradle build
+        working-directory: ./order-service

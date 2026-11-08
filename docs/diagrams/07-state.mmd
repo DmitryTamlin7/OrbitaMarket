@@ -1,0 +1,20 @@
+stateDiagram-v2
+    [*] --> PENDING_PAYMENT : Создание заказа (FR-1)
+
+    PENDING_PAYMENT --> PAID : OrderPaymentCompletedEvent\n(достаточно средств)
+    PENDING_PAYMENT --> FAILED : OrderPaymentFailedEvent\n(INSUFFICIENT_BALANCE)
+    PENDING_PAYMENT --> CANCELLED : Отмена пользователем (FR-8)
+
+    PAID --> [*]
+    FAILED --> [*]
+    CANCELLED --> [*]
+
+    note right of PENDING_PAYMENT
+        Ожидает асинхронной
+        обработки платежа
+    end note
+
+    note right of PAID
+        Можно выдавать
+        архивные данные (FR-7)
+    end note

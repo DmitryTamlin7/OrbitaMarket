@@ -1,0 +1,148 @@
+// OrbitaMarket — Architecture as Code (LikeC4)
+// Версия 1.1 — с иконками и цветами
+
+specification {
+  element actor {
+    style {
+      shape person
+      color blue
+      icon bootstrap:person
+    }
+  }
+
+  element system {
+    style {
+      color slate
+    }
+  }
+
+  element container {
+    style {
+      color blue
+    }
+  }
+
+  element database {
+    style {
+      shape storage
+      color green
+    }
+  }
+
+  element queue {
+    style {
+      shape queue
+      color amber
+    }
+  }
+
+  relationship async {
+    color amber
+    line dotted
+  }
+
+  relationship sync {
+    color slate
+  }
+}
+
+model {
+
+  // ===== Actors =====
+  user = actor 'Пользователь' {
+    description 'Сотрудник аналитической компании / оператор ДЗЗ. Создаёт заказы, управляет балансом, получает данные.'
+  }
+
+  // ===== System =====
+  orbita = system 'OrbitaMarket' {
+    description 'Платформа заказа и оплаты продуктов дистанционного зондирования Земли (ARCHIVE, TASKING, MONITORING)'
+
+    // --- Containers ---
+    gateway = container 'API Gateway' {
+      technology 'Spring Cloud Gateway'
+      description 'Единая точка входа. Маршрутизация, валидация X-User-Id, polymorphic JSON.'
+      icon tech:spring
+      style {
+        color indigo
+      }
+    }
+
+    orderService = container 'Order Service' {
+      technology 'Spring Boot 3 + Java 21'
+      description 'Управление жизненным циклом заказов. Полиморфный payload, Outbox, публикация событий оплаты.'
+      icon tech:spring
+      style {
+        color blue
+      }
+    }
+
+    paymentsService = container 'Payments Service' {
+      technology 'Spring Boot 3 + Java 21'
+      description 'Биллинг и кошельки (geocredits). Идемпотентная обработка платежей, защита от double-spending.'
+      icon tech:spring
+      style {
+        color blue
+      }
+    }
+
+    kafka = queue 'Apache Kafka' {
+      technology 'Kafka (KRaft)'
+      description 'Шина событий: payment-requests, payment-completed, payment-failed. Ключ — orderId.'
+      icon tech:apachekafka
+      style {
+        color amber
+      }
+    }
+
+    ordersDb = database 'Orders DB' {
+      technology 'PostgreSQL'
+      description 'Заказы + JSONB payload + Outbox. Статусы: PENDING_PAYMENT → PAID / FAILED.'
+      icon tech:postgresql
+      style {
+        color green
+      }
+    }
+
+    paymentsDb = database 'Payments DB' {
+      technology 'PostgreSQL'
+      description 'Кошельки пользователей (geocredits) + таблица processed_orders для идемпотентности.'
+      icon tech:postgresql
+      style {
+        color green
+      }
+    }
+  }
+
+  // ===== Relationships =====
+
+  user -> orbita.gateway 'HTTPS / REST' {
+    technology 'HTTP'
+  }
+
+  orbita.gateway -> orbita.orderService 'проксирует запросы заказов' {
+    technology 'HTTP'
+  }
+  orbita.gateway -> orbita.paymentsService 'проксирует запросы кошелька' {
+    technology 'HTTP'
+  }
+
+  orbita.orderService -> orbita.ordersDb 'читает/пишет заказы и Outbox' {
+    technology 'JDBC'
+  }
+  orbita.orderService -[async]-> orbita.kafka 'OrderPaymentRequestedEvent' {
+    technology 'Kafka Producer'
+  }
+  orbita.kafka -[async]-> orbita.orderService 'payment-completed / payment-failed' {
+    technology 'Kafka Consumer'
+  }
+
+  orbita.paymentsService -> orbita.paymentsDb 'читает/пишет кошельки и processed_orders' {
+    technology 'JDBC'
+  }
+  orbita.kafka -[async]-> orbita.paymentsService 'payment-requests' {
+    technology 'Kafka Consumer'
+  }
+  orbita.paymentsService -[async]-> orbita.kafka 'payment-completed / payment-failed' {
+    technology 'Kafka Producer'
+  }
+}

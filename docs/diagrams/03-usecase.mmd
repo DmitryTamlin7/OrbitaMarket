@@ -1,0 +1,25 @@
+flowchart LR
+    User((Пользователь))
+
+    subgraph OrbitaMarket
+        UC1[UC-1: Создать заказ<br/>FR-1]
+        UC2[UC-2: Просмотреть список заказов<br/>FR-2]
+        UC3[UC-3: Просмотреть детали заказа<br/>FR-3]
+        UC4[UC-4: Получить / создать кошелёк<br/>FR-4]
+        UC5[UC-5: Пополнить баланс<br/>FR-5]
+        UC6[UC-6: Оплатить заказ<br/>FR-6]
+        UC7[UC-7: Получить архивные данные<br/>FR-7]
+        UC8[UC-8: Отменить заказ<br/>FR-8]
+    end
+
+    User --> UC1
+    User --> UC2
+    User --> UC3
+    User --> UC4
+    User --> UC5
+    User --> UC6
+    User --> UC7
+    User --> UC8
+
+    UC1 -.-> UC6
+    UC6 -.-> UC7

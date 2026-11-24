@@ -1,0 +1,128 @@
+views {
+
+  // =====================================================
+  // 1. CONTEXT VIEW
+  // =====================================================
+  view context {
+    title '1. System Context — OrbitaMarket'
+    description '''
+      Границы системы, пользователь и основные внешние взаимодействия.
+      Иллюстрирует: FR-1 … FR-6, NFR-1
+    '''
+
+    include user, orbita
+    exclude orbita.*
+
+    style user {
+      color #3b82f6
+    }
+    style orbita {
+      color #0f172a
+    }
+
+    autoLayout TopBottom
+  }
+
+  // =====================================================
+  // 2. CONTAINER VIEW
+  // =====================================================
+  view containers {
+    title '2. Containers — OrbitaMarket'
+    description '''
+      Внутренняя структура системы: Gateway, сервисы, Kafka, базы данных.
+      Показывает слабую связанность и асинхронное взаимодействие.
+    '''
+
+    include user, orbita.*
+
+    style orbita.gateway {
+      color #1e40af
+    }
+    style orbita.orderService {
+      color #1e40af
+    }
+    style orbita.paymentsService {
+      color #1e40af
+    }
+    style orbita.kafka {
+      color #d97706
+    }
+    style orbita.ordersDb {
+      color #059669
+    }
+    style orbita.paymentsDb {
+      color #059669
+    }
+
+    autoLayout TopBottom
+  }
+
+  // =====================================================
+  // 3. SEQUENCE — Успешная оплата заказа (FR-1 + FR-6)
+  // =====================================================
+  dynamic view sequence_success {
+    title '3. Sequence — Успешное создание и оплата заказа'
+    description '''
+      Сценарий: Пользователь создаёт заказ → асинхронная оплата → статус PAID.
+      Ссылки: FR-1, FR-6, US-1 (успешный путь)
+    '''
+
+    variant sequence
+
+    user -> orbita.gateway 'POST /api/v1/orders (ARCHIVE/TASKING/MONITORING)'
+    orbita.gateway -> orbita.orderService 'forward + X-User-Id'
+    orbita.orderService -> orbita.ordersDb 'INSERT order (PENDING_PAYMENT) + Outbox'
+    orbita.orderService -> orbita.kafka 'OrderPaymentRequestedEvent'
+    orbita.orderService -> orbita.gateway '201 Created + orderId'
+    orbita.gateway -> user '201 Created'
+
+    // Асинхронная часть
+    orbita.kafka -> orbita.paymentsService 'payment-requests'
+    orbita.paymentsService -> orbita.paymentsDb 'existsById(orderId)? → false'
+    orbita.paymentsService -> orbita.paymentsDb 'UPDATE balance, INSERT processed_orders'
+    orbita.paymentsService -> orbita.kafka 'OrderPaymentCompletedEvent'
+
+    orbita.kafka -> orbita.orderService 'payment-completed'
+    orbita.orderService -> orbita.ordersDb 'UPDATE status = PAID'
+  }
+
+  // =====================================================
+  // 4. SEQUENCE — Ошибка (недостаточно средств)
+  // =====================================================
+  dynamic view sequence_error {
+    title '4. Sequence — Ошибка оплаты (INSUFFICIENT_BALANCE)'
+    description '''
+      Сценарий с ошибкой: баланса не хватает → статус FAILED.
+      Ссылки: FR-6, обработка ошибки
+    '''
+
+    variant sequence
+
+    user -> orbita.gateway 'POST /api/v1/orders'
+    orbita.gateway -> orbita.orderService 'forward'
+    orbita.orderService -> orbita.ordersDb 'INSERT order (PENDING_PAYMENT)'
+    orbita.orderService -> orbita.kafka 'OrderPaymentRequestedEvent'
+    orbita.orderService -> orbita.gateway '201 Created'
+    orbita.gateway -> user '201 Created'
+
+    // Асинхронная часть — ошибка
+    orbita.kafka -> orbita.paymentsService 'payment-requests'
+    orbita.paymentsService -> orbita.paymentsDb 'проверка баланса'
+    orbita.paymentsService -> orbita.kafka 'OrderPaymentFailedEvent (INSUFFICIENT_BALANCE)'
+
+    orbita.kafka -> orbita.orderService 'payment-failed'
+    orbita.orderService -> orbita.ordersDb 'UPDATE status = FAILED'
+  }
+
+  // =====================================================
+  // 5. CONTAINER VIEW — только платежный контур
+  // =====================================================
+  view payments_focus {
+    title '5. Focus — Payments & Idempotency'
+    description 'Фокус на идемпотентности и защите от double-spending (NFR-3)'
+
+    include orbita.orderService, orbita.paymentsService, orbita.kafka, orbita.paymentsDb, orbita.ordersDb
+
+    autoLayout LeftRight
+  }
+}

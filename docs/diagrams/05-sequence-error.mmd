@@ -1,0 +1,32 @@
+sequenceDiagram
+    autonumber
+    actor User as Пользователь
+    participant GW as API Gateway
+    participant OS as Order Service
+    participant DB_O as Orders DB
+    participant Kafka as Apache Kafka
+    participant PS as Payments Service
+    participant DB_P as Payments DB
+
+    User->>GW: POST /api/v1/orders
+    GW->>OS: Forward + X-User-Id
+    activate OS
+    OS->>DB_O: INSERT order<br/>status = PENDING_PAYMENT
+    OS->>Kafka: OrderPaymentRequestedEvent
+    OS-->>GW: 201 Created + orderId
+    deactivate OS
+    GW-->>User: 201 Created
+
+    Note over Kafka, PS: Асинхронная обработка (ошибка)
+
+    Kafka->>PS: payment-requests
+    activate PS
+    PS->>DB_P: Проверка баланса
+    Note right of PS: Баланс < суммы заказа
+    PS->>Kafka: OrderPaymentFailedEvent<br/>(INSUFFICIENT_BALANCE)
+    deactivate PS
+
+    Kafka->>OS: payment-failed
+    activate OS
+    OS->>DB_O: UPDATE status = FAILED
+    deactivate OS

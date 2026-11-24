@@ -1,0 +1,31 @@
+flowchart TD
+    Start([Пользователь хочет купить продукт ДЗЗ]) --> CreateOrder[Создаёт заказ<br/>ARCHIVE / TASKING / MONITORING]
+    CreateOrder --> Validate{Валидация<br/>X-User-Id + payload}
+    Validate -->|Ошибка| Err400[400 Bad Request]
+    Validate -->|OK| SaveOrder[Order Service:<br/>сохраняет заказ<br/>статус = PENDING_PAYMENT]
+    SaveOrder --> Publish[Публикует<br/>OrderPaymentRequestedEvent<br/>в Kafka]
+    Publish --> Return201[Возвращает 201 Created<br/>+ orderId]
+
+    Publish --> Async[Асинхронная обработка]
+    Async --> Payments[Payments Service<br/>читает событие]
+    Payments --> Idempotency{orderId уже<br/>обрабатывался?}
+    Idempotency -->|Да| Drop[Игнорирует дубликат]
+    Idempotency -->|Нет| CheckBalance{Баланс ≥ суммы?}
+
+CheckBalance -->|Да| Charge[Списывает средства<br/>+ пишет в processed_orders]
+Charge --> SuccessEvent[Публикует<br/>OrderPaymentCompletedEvent]
+SuccessEvent --> UpdatePaid[Order Service:<br/>статус = PAID]
+
+CheckBalance -->|Нет| FailEvent[Публикует<br/>OrderPaymentFailedEvent]
+FailEvent --> UpdateFailed[Order Service:<br/>статус = FAILED]
+
+UpdatePaid --> EndSuccess([Заказ оплачен])
+UpdateFailed --> EndFail([Заказ отклонён])
+Drop --> EndDrop([Дубликат отброшен])
+Err400 --> EndErr([Ошибка валидации])
+
+style Start fill:#3b82f6,color:#fff
+style EndSuccess fill:#059669,color:#fff
+style EndFail fill:#dc2626,color:#fff
+style EndDrop fill:#6b7280,color:#fff
+style EndErr fill:#dc2626,color:#fff

@@ -1,0 +1,46 @@
+classDiagram
+    direction TB
+
+    class Order {
+        +UUID id
+        +String userId
+        +ProductType productType
+        +OrderStatus status
+        +BigDecimal amount
+        +JSONB payload
+        +Instant createdAt
+        +Instant updatedAt
+    }
+
+    class Wallet {
+        +UUID id
+        +String userId
+        +BigDecimal balance
+        +Instant createdAt
+        +Instant updatedAt
+    }
+
+    class ProcessedOrder {
+        +UUID orderId
+        +Instant processedAt
+    }
+
+    class ProductType {
+        <<enumeration>>
+        ARCHIVE
+        TASKING
+        MONITORING
+    }
+
+    class OrderStatus {
+        <<enumeration>>
+        PENDING_PAYMENT
+        PAID
+        FAILED
+        CANCELLED
+    }
+
+    Order --> ProductType : productType
+    Order --> OrderStatus : status
+    Order "1" --> "0..1" ProcessedOrder : orderId
+    Wallet "1" --> "*" Order : userId
